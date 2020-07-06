@@ -88,7 +88,6 @@ function init() {
   game.style.gridTemplateRows = `repeat(${INIT_BOARD.length}, 20px)`
 
   let startButton = document.getElementById("start-button")
-  let stopButton = document.getElementById("stop-button")
   
   let stringBoard = JSON.stringify(INIT_BOARD)
   let stringSnake = JSON.stringify(INIT_SNAKE)
@@ -107,12 +106,19 @@ function init() {
   let gameIsRunning = false
   let command = UP_CODE
 
-  startButton.onclick = startGame
-  stopButton.onclick = stopGame
-
+  startButton.onclick = checkGame
+  function checkGame() {
+    gameIsRunning = !gameIsRunning
+    if (gameIsRunning) {
+      startButton.innerText = "Pause"
+      startGame()
+    } else {
+      stopGame()
+      startButton.innerText = "Play"
+    }
+  }
   // init game
   renderBoard()
-
 
   // ISSUE: when down and right keys are pressed at the nearest time => go to the opposite side
   document.addEventListener("keydown", event => {
@@ -124,7 +130,6 @@ function init() {
   })
 
   function startGame() {
-    gameIsRunning = true
     runningInterval = setInterval(() => {
       // set to empty board
       currentBoard = JSON.parse(stringBoard)
@@ -154,12 +159,10 @@ function init() {
         currentBoard[apple[0]][apple[1]] = 0
         apple = applePosition(runningSnake)        
       }
-
     }, 100)
   }
 
   function stopGame() {
-    gameIsRunning = false
     clearInterval(runningInterval)
   }
 
