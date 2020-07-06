@@ -1,0 +1,23 @@
+#game {
+  display: grid;
+}
+.field {
+  height: 20px;
+  width: 20px;
+  background-color: aliceblue;
+}
+.snake-head {
+  height: 20px;
+  width: 20px;
+  background-color: #579c55;
+}
+.snake-chunk {
+  height: 20px;
+  width: 20px;
+  background-color: #7eb37c;
+}
+.apple {
+  height: 20px;
+  width: 20px;
+  background-color: #bd6161;
+}
