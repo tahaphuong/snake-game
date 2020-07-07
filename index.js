@@ -94,12 +94,20 @@ function init() {
   let currentBoard = JSON.parse(stringBoard)
   let runningSnake = JSON.parse(stringSnake)
   let apple = applePosition(runningSnake)
-  // set snake
+  let living = true
+
+  // if snake eats apple -> push a new chunk here
+  let pendingChunks = []
+
+  // chunk which is ready to be added to the snake
+  let readyChunk = null
+
+  // set snake UI
   for (let i=0; i<runningSnake.length; i++) {
     let chunk = runningSnake[i]
     currentBoard[chunk[0]][chunk[1]] = i==0 ? 1.5 : 1
   }
-  // set apple
+  // set apple UI
   currentBoard[apple[0]][apple[1]] = 2
 
   let runningInterval
@@ -113,8 +121,8 @@ function init() {
       startButton.innerText = "Pause"
       startGame()
     } else {
-      stopGame()
-      startButton.innerText = "Play"
+      pauseGame()
+      startButton.innerText = "Play" 
     }
   }
   // init game
@@ -154,15 +162,44 @@ function init() {
           runningSnake = goDown(runningSnake)
         break
       }
+      if (readyChunk != null) {
+        runningSnake.push(readyChunk)
+        readyChunk = null
+      }
+
+      // render after 100 miliseconds
       renderBoard()
+
+      // if snake meets apple
       if (runningSnake[0][0] == apple[0] && runningSnake[0][1] == apple[1]) {
         currentBoard[apple[0]][apple[1]] = 0
+        pendingChunks.push(apple)
         apple = applePosition(runningSnake)        
+      }
+
+      // when snake ate apple
+      if (pendingChunks.length) {
+        let chunk = pendingChunks[0]
+        let len = runningSnake.length
+        if (runningSnake[len-1][0] == chunk[0] && runningSnake[len-1][1] == chunk[1]) {
+          pendingChunks.shift()
+          readyChunk = chunk
+        }
+      }
+
+      // if snake eat itself
+      for (let i=1; i<runningSnake.length; i++) {
+        let chunk = runningSnake[i]
+        let head = runningSnake[0]
+        if ((head[0] == chunk[0]) && (head[1] == chunk[1])) {
+          checkGame()
+          // TODO: end game here
+        }
       }
     }, 100)
   }
 
-  function stopGame() {
+  function pauseGame() {
     clearInterval(runningInterval)
   }
 
