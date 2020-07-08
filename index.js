@@ -39,6 +39,8 @@ const keysHorizontal = [
   RIGHT_CODE,
 ]
 
+const framesPerSecond = 25
+
 function goLeft(snake) {
   snake.pop()
   let x = snake[0][1] - 1 < 0 ? INIT_BOARD[0].length - 1 : snake[0][1] - 1
@@ -86,15 +88,17 @@ function init() {
   let game = document.getElementById("game")
   game.style.gridTemplateColumns = `repeat(${INIT_BOARD[0].length}, 20px)`
   game.style.gridTemplateRows = `repeat(${INIT_BOARD.length}, 20px)`
-
   let startButton = document.getElementById("start-button")
-  
+  let currentScoreDiv = document.getElementById("current-score")
+  let highScoreDiv = document.getElementById("high-score")
+  let currentScore = 0
+  let highScore = 0
+
   let stringBoard = JSON.stringify(INIT_BOARD)
   let stringSnake = JSON.stringify(INIT_SNAKE)
   let currentBoard = JSON.parse(stringBoard)
   let runningSnake = JSON.parse(stringSnake)
   let apple = applePosition(runningSnake)
-  let living = true
 
   // if snake eats apple -> push a new chunk here
   let pendingChunks = []
@@ -110,6 +114,7 @@ function init() {
   // set apple UI
   currentBoard[apple[0]][apple[1]] = 2
 
+  // interval
   let runningInterval
   let gameIsRunning = false
   let command = UP_CODE
@@ -119,6 +124,12 @@ function init() {
     gameIsRunning = !gameIsRunning
     if (gameIsRunning) {
       startButton.innerText = "Pause"
+      if (currentScore > highScore) {
+        highScore = currentScore
+      }
+      currentScore = 0
+      currentScoreDiv.innerText = currentScore
+      highScoreDiv.innerText = highScore
       startGame()
     } else {
       pauseGame()
@@ -133,6 +144,7 @@ function init() {
     if (gameIsRunning) {
       if((keysVertical.includes(command) && keysHorizontal.includes(event.keyCode))
       || (keysHorizontal.includes(command) && keysVertical.includes(event.keyCode))
+      // ) {setTimeout(()=>{command = event.keyCode}, 50)}
       ) {command = event.keyCode}
     }
   })
@@ -167,17 +179,19 @@ function init() {
         readyChunk = null
       }
 
-      // render after 100 miliseconds
+      // render after 1000/FPS miliseconds
       renderBoard()
 
-      // if snake meets apple
+      // if snake eats 1 apple
       if (runningSnake[0][0] == apple[0] && runningSnake[0][1] == apple[1]) {
         currentBoard[apple[0]][apple[1]] = 0
         pendingChunks.push(apple)
         apple = applePosition(runningSnake)        
+        currentScore += 1
+        currentScoreDiv.innerText = currentScore
       }
 
-      // when snake ate apple
+      // snake ate (multiple) apples, length will be extended
       if (pendingChunks.length) {
         let chunk = pendingChunks[0]
         let len = runningSnake.length
@@ -192,11 +206,26 @@ function init() {
         let chunk = runningSnake[i]
         let head = runningSnake[0]
         if ((head[0] == chunk[0]) && (head[1] == chunk[1])) {
-          checkGame()
-          // TODO: end game here
+          gameIsRunning = !gameIsRunning
+          pauseGame()
+          startButton.innerText = "Play again"
+          
+          // reset game
+          currentBoard = JSON.parse(stringBoard)
+          runningSnake = JSON.parse(stringSnake)
+          apple = applePosition(runningSnake)
+
+          pendingChunks = []
+          readyChunk = null
+          for (let i=0; i<runningSnake.length; i++) {
+            let chunk = runningSnake[i]
+            currentBoard[chunk[0]][chunk[1]] = i==0 ? 1.5 : 1
+          }
+          currentBoard[apple[0]][apple[1]] = 2
+          command = UP_CODE
         }
       }
-    }, 100)
+    }, 1000 / framesPerSecond)
   }
 
   function pauseGame() {

@@ -21,3 +21,26 @@
   width: 20px;
   background-color: #bd6161;
 }
+
+.scores {
+  width: 200px;
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 40px;
+}
+
+.score-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.score {
+  font-size: 30px;
+}
