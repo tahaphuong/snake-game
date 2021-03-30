@@ -24,10 +24,14 @@ const DOWN_CODE = "ArrowDown"
 const KEYS_VERTICAL = [
   UP_CODE,
   DOWN_CODE,
+  "up",
+  "down"
 ]
 const KEYS_HORIZONTAL = [
   LEFT_CODE,
   RIGHT_CODE,
+  "left",
+  "right"
 ]
 
 const FRAMES_PER_SEC = 25
@@ -137,14 +141,45 @@ function init() {
   renderBoard()
 
   // ISSUE: when down and right keys are pressed at the nearest time => go to the opposite side
+
   document.addEventListener("keydown", event => {
+
     if (gameIsRunning) {
       if((KEYS_VERTICAL.includes(command) && KEYS_HORIZONTAL.includes(event.key))
       || (KEYS_HORIZONTAL.includes(command) && KEYS_VERTICAL.includes(event.key))
       ) {command = event.key}
     }
+    
   })
 
+  document.addEventListener("swiped", event => {
+
+    if (gameIsRunning) {
+      if((KEYS_VERTICAL.includes(command) && KEYS_HORIZONTAL.includes(event.detail.dir))
+      || (KEYS_HORIZONTAL.includes(command) && KEYS_VERTICAL.includes(event.detail.dir))
+      ) {
+        if (gameIsRunning) {
+          switch (event.detail.dir) {
+            case "up":
+              command = UP_CODE
+              break;
+            case "down":
+              command = DOWN_CODE
+              break;
+            case "left":
+              command = LEFT_CODE
+              break;
+            case "right":
+              command = RIGHT_CODE
+              break;
+            default:
+              break;
+          }
+        }
+      }  
+    }
+  })
+ 
   function startGame() {
     runningInterval = setInterval(() => {
       // set to empty board

@@ -1,2 +1,3 @@
 ﻿# snake-game
-bug vloz
+
+3 index files
