@@ -1,23 +1,14 @@
-const INIT_BOARD = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-]
+const HEIGHT = 18
+const WIDTH = 18
+
+const INIT_BOARD = []
+for (let i=0; i<HEIGHT; i++) {
+  let row = []
+  for (let j=0; j<WIDTH; j++) {
+    row.push(0)
+  }
+  INIT_BOARD.push(row)
+}
 
 // NOTICE: [y, x] [row, column]
 const INIT_SNAKE = [
@@ -26,21 +17,23 @@ const INIT_SNAKE = [
   [10, 8]
 ]
 
-const LEFT_CODE = 37
-const UP_CODE = 38
-const RIGHT_CODE = 39
-const DOWN_CODE = 40
-const keysVertical = [
+const LEFT_CODE = "ArrowLeft"
+const UP_CODE = "ArrowUp"
+const RIGHT_CODE = "ArrowRight"
+const DOWN_CODE = "ArrowDown"
+const KEYS_VERTICAL = [
   UP_CODE,
   DOWN_CODE,
 ]
-const keysHorizontal = [
+const KEYS_HORIZONTAL = [
   LEFT_CODE,
   RIGHT_CODE,
 ]
 
-const framesPerSecond = 25
+const FRAMES_PER_SEC = 25
 
+
+// SNAKE MOVEMENTS ------------------------------
 function goLeft(snake) {
   snake.pop()
   let x = snake[0][1] - 1 < 0 ? INIT_BOARD[0].length - 1 : snake[0][1] - 1
@@ -69,6 +62,8 @@ function goDown(snake) {
   return snake
 }
 
+
+// APPLE'S POSITION -------------------------------
 function applePosition(runningSnake) {
   let x = Math.floor(Math.random() * INIT_BOARD[0].length)
   let y = Math.floor(Math.random() * INIT_BOARD.length)
@@ -82,6 +77,7 @@ function applePosition(runningSnake) {
   } 
 }
 
+// START GAME------------------------------
 window.onload = init()
 
 function init() {
@@ -92,7 +88,7 @@ function init() {
   let currentScoreDiv = document.getElementById("current-score")
   let highScoreDiv = document.getElementById("high-score")
   let currentScore = 0
-  let highScore = 0
+  highScoreDiv.innerText = parseInt(localStorage.getItem("highScore") || 0)
 
   let stringBoard = JSON.stringify(INIT_BOARD)
   let stringSnake = JSON.stringify(INIT_SNAKE)
@@ -124,12 +120,13 @@ function init() {
     gameIsRunning = !gameIsRunning
     if (gameIsRunning) {
       startButton.innerText = "Pause"
-      if (currentScore > highScore) {
-        highScore = currentScore
+
+      if (currentScore > parseInt(localStorage.getItem("highScore") || 0)) {
+        localStorage.setItem("highScore", currentScore)
       }
       currentScore = 0
       currentScoreDiv.innerText = currentScore
-      highScoreDiv.innerText = highScore
+      highScoreDiv.innerText = parseInt(localStorage.getItem("highScore") || 0)
       startGame()
     } else {
       pauseGame()
@@ -142,10 +139,9 @@ function init() {
   // ISSUE: when down and right keys are pressed at the nearest time => go to the opposite side
   document.addEventListener("keydown", event => {
     if (gameIsRunning) {
-      if((keysVertical.includes(command) && keysHorizontal.includes(event.keyCode))
-      || (keysHorizontal.includes(command) && keysVertical.includes(event.keyCode))
-      // ) {setTimeout(()=>{command = event.keyCode}, 50)}
-      ) {command = event.keyCode}
+      if((KEYS_VERTICAL.includes(command) && KEYS_HORIZONTAL.includes(event.key))
+      || (KEYS_HORIZONTAL.includes(command) && KEYS_VERTICAL.includes(event.key))
+      ) {command = event.key}
     }
   })
 
@@ -225,7 +221,7 @@ function init() {
           command = UP_CODE
         }
       }
-    }, 1000 / framesPerSecond)
+    }, 1000 / FRAMES_PER_SEC)
   }
 
   function pauseGame() {
